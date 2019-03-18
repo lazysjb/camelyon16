@@ -2,3 +2,4 @@
 # ignore directory
 test/
 .ipynb_checkpoints/
+__pycache__/
