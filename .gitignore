@@ -1,0 +1,4 @@
+
+# ignore directory
+test/
+.ipynb_checkpoints/
