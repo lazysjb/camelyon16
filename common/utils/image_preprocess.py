@@ -1,4 +1,5 @@
 import math
+from PIL import Image
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -39,7 +40,10 @@ def read_slide_partitions(slide,
                           partition_width=256,
                           partition_height=256,
                           include_padding=False,
-                          show_plot=False):
+                          is_mask=False,
+                          show_plot=False,
+                          save_mode=False,
+                          save_file_prefix=None):
     """ Read slide in partitioned images of defined width / height
 
     Args:
@@ -49,12 +53,27 @@ def read_slide_partitions(slide,
         partition_height: height of each partitioned image
         include_padding: if True, include paddings in the last partition and show
             image. If False, cut off the last partition
+        is_mask: if True, only show the first channel
         show_plot: if True, plot the partitions
+        save_mode: if True, save partitioned files to jpeg
+        save_file_prefix: if save_mode is True, partitions are saved with save_file_prefix
 
     Returns:
         List of partitioned numpy arrays (RGB)
 
     """
+    if save_mode:
+        if save_file_prefix is None:
+            raise ValueError('save_file_prefix must be defined if save_mode is set to True')
+
+        if is_mask:
+            # save as numpy array
+            save_path = save_file_prefix + '_{row_id}_{col_id}.npy'
+        else:
+            # save as png image
+            save_path = save_file_prefix + '_{row_id}_{col_id}.png'
+        print('Saving under the file name patterns: ', save_path)
+
     slide_height, slide_width = slide.level_dimensions[level]
     downsample_factor = int(slide.level_downsamples[level])
 
@@ -78,6 +97,23 @@ def read_slide_partitions(slide,
                                          level=level,
                                          width=partition_width,
                                          height=partition_height)
+
+            # Sanity check - original image is always 3 channels
+            assert len(partition_image.shape) == 3
+            assert partition_image.shape[-1] == 3
+
+            # If it is mask, select only the first channel
+            if is_mask:
+                partition_image = partition_image[:, :, 0]
+                if save_mode:
+                    # save as numpy array
+                    np.save(save_path.format(row_id=i, col_id=j), partition_image)
+            else:
+                if save_mode:
+                    # save as PNG file
+                    im = Image.fromarray(partition_image)
+                    im.save(save_path.format(row_id=i, col_id=j), format='PNG')
+
             partitions.append(partition_image)
 
     if show_plot:
@@ -90,6 +126,20 @@ def read_slide_partitions(slide,
         plt.show()
 
     return partitions
+
+
+def read_slide_partition_file(file_path):
+    """Read partitioned slide file"""
+    if not file_path.endswith('.png'):
+        raise ValueError('Slide partition file expected to be png')
+    return np.asarray(Image.open(file_path))
+
+
+def read_mask_partition_file(file_path):
+    """Read partitioned mask file - note that this is single channel"""
+    if not file_path.endswith('.npy'):
+        raise ValueError('Slide mask file expected to be npy')
+    return np.load(file_path)
 
 
 def get_slide_filename_from_image_id(image_id):
