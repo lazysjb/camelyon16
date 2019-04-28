@@ -114,7 +114,8 @@ def read_slide_partitions(slide,
                     im = Image.fromarray(partition_image)
                     im.save(save_path.format(row_id=i, col_id=j), format='PNG')
 
-            partitions.append(partition_image)
+            if show_plot:
+                partitions.append(partition_image)
 
     if show_plot:
         fig, axes = plt.subplots(n_rows, n_cols, figsize=(20, 20))
@@ -126,6 +127,84 @@ def read_slide_partitions(slide,
         plt.show()
 
     return partitions
+
+
+def read_slide_partitions_with_overlap(slide,
+                                       level,
+                                       partition_width=256,
+                                       partition_height=256,
+                                       offset=(64, 64),
+                                       overlap=128,
+                                       is_mask=False,
+                                       save_file_prefix=None):
+    if is_mask:
+        # save as numpy array
+        save_path = save_file_prefix + '_{row_id}_{col_id}_overlap_{overlap}_offset_{offset}.npy'
+    else:
+        # save as png image
+        save_path = save_file_prefix + '_{row_id}_{col_id}_overlap_{overlap}_offset_{offset}.png'
+    print('Saving under the file name patterns: ', save_path)
+
+    slide_height, slide_width = slide.level_dimensions[level]
+    downsample_factor = int(slide.level_downsamples[level])
+    offset_x, offset_y = offset
+
+    j = 0
+    MAX_COUNT = 100000
+    counter = 0
+
+    x_start_init = offset_x * downsample_factor
+
+    x_start = x_start_init
+    x_end = x_start + partition_height * downsample_factor
+
+    y_start_init = offset_y * downsample_factor
+
+    while x_end < slide_height * downsample_factor:
+
+        i = 0
+        y_start = y_start_init
+        y_end = y_start + partition_width * downsample_factor
+
+        while y_end < slide_width * downsample_factor:
+            partition_image = read_slide(slide,
+                                         x=x_start,
+                                         y=y_start,
+                                         level=level,
+                                         width=partition_width,
+                                         height=partition_height)
+
+            # Adding +1 to i, j for the file_names so that the zoom levels match up easier
+            if is_mask:
+                partition_image = partition_image[:, :, 0]
+                np.save(save_path.format(row_id=i+1,
+                                         col_id=j+1,
+                                         overlap=overlap,
+                                         offset=offset_x), partition_image)
+            else:
+                im = Image.fromarray(partition_image)
+                im.save(save_path.format(row_id=i+1,
+                                         col_id=j+1,
+                                         overlap=overlap,
+                                         offset=offset_x), format='PNG')
+
+            # Sanity check - original image is always 3 channels
+            assert len(partition_image.shape) == 3
+            assert partition_image.shape[-1] == 3
+
+            i += 1
+            y_start = y_start_init + (partition_width - overlap) * i * downsample_factor
+            y_end = y_start + partition_width * downsample_factor
+
+            counter += 1
+            if counter > MAX_COUNT:
+                raise ValueError('Unexpectedly large number of iterations!')
+
+        j += 1
+        x_start = x_start_init + (partition_height - overlap) * j * downsample_factor
+        x_end = x_start + partition_height * downsample_factor
+
+    return
 
 
 def read_slide_partition_file(file_path):
