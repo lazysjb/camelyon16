@@ -1,8 +1,10 @@
 import math
 from PIL import Image
 
-import matplotlib.pyplot as plt
-import numpy as np
+import matplotlib
+matplotlib.use('TkAgg')
+import matplotlib.pyplot as plt     # noqa: E402
+import numpy as np      # noqa: E402
 
 
 # Taken directly from

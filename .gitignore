@@ -2,5 +2,10 @@
 # ignore directory
 test/
 .ipynb_checkpoints/
+.idea/
+.DS_Store/
 __pycache__/
 temp/
+
+# ignore files
+.DS_Store
