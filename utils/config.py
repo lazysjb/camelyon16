@@ -9,6 +9,9 @@ ALL_SLIDE_META_INFO_FILENAME = 'all_slides_meta_info.pkl'
 TRAIN_VAL_TEST_SPLIT_FILENAME = 'train_val_test_split.pkl'
 PARTITION_META_INFO_FILENAME = 'partition_meta_info.json'
 
+ROI_MASK_FILEFORMAT = 'zoom_5_opening_mask_tumor_{}.npy'
+ROI_CONTOUR_FILEFORMAT = 'zoom_5_roi_contour_{}.jpg'
+
 NON_GRAY_RATIO_THRESHOLD = 0.4
 
 IMG_PARTITION_PARAMS = {

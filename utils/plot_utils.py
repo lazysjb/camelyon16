@@ -6,8 +6,7 @@ import pandas as pd
 
 from params import args
 from utils.config import IMG_PARTITION_PARAMS, NON_GRAY_RATIO_THRESHOLD
-from utils.image_preprocess import read_slide
-from utils.slide_utils import get_inference_file_name
+from utils.slide_utils import get_inference_file_name, read_slide
 
 
 HEATMAP_OUTPUT_ZOOM_LEVEL = 5

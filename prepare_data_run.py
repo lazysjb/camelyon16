@@ -1,3 +1,4 @@
+from utils.image_preprocess import create_roi_mask_and_contour_for_all_images
 from utils.slide_utils import (
     get_meta_info_for_all_slides, get_train_val_test_split)
 
@@ -9,6 +10,6 @@ _ = get_meta_info_for_all_slides(save=True)
 print('\nSplitting slides to train / val / test ...')
 _ = get_train_val_test_split(save=True)
 
-# Step 3: Partition slides to predefined configurations
-
-# Step 4: Create meta info
+# Step 3: Create ROI info
+print('\nCreating ROI information ...')
+create_roi_mask_and_contour_for_all_images()

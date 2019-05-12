@@ -14,7 +14,6 @@ from utils.config import (
     ALL_SLIDE_IDS, ALL_SLIDE_META_INFO_FILENAME,
     INFERENCE_FILE_MAPS, TRAIN_VAL_TEST_SPLIT_FILENAME
 )
-from utils.image_preprocess import read_slide
 
 
 DEFAULT_ZOOM_LEVEL_FOR_META_INFO = 5
@@ -159,3 +158,33 @@ def get_inference_file_name(model_name,
         raise ValueError('Incorrect input params!')
 
     return result[0]['file_name']
+
+
+# Taken directly from
+# https://github.com/random-forests/applied-dl/blob/master/project/starter-code.ipynb
+# See https://openslide.org/api/python/#openslide.OpenSlide.read_region
+# Note: x,y coords are with respect to level 0.
+def read_slide(slide, x, y, level, width, height, as_float=False):
+    """Read a region from openslide object
+
+    Args:
+        slide: openslide object
+        x: left most pixel co-ord
+        y: top most pixel co-ord
+        level: zoom level number
+        width:
+        height:
+        as_float:
+
+    Returns:
+        Numpy RGB array
+
+    """
+    im = slide.read_region((x, y), level, (width, height))
+    im = im.convert('RGB')  # drop the alpha channel
+    if as_float:
+        im = np.asarray(im, dtype=np.float32)
+    else:
+        im = np.asarray(im)
+    assert im.shape == (height, width, 3)
+    return im

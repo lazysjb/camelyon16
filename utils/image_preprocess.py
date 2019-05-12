@@ -1,41 +1,21 @@
 import math
+import os
 from PIL import Image
 
+import cv2
 import matplotlib
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt     # noqa: E402
 import numpy as np      # noqa: E402
+from openslide import open_slide    # noqa: E402
 from skimage.color import rgb2gray  # noqa: E402
 
+from params import args     # noqa: E402
+from utils.config import ROI_CONTOUR_FILEFORMAT, ROI_MASK_FILEFORMAT    # noqa: E402
+from utils.slide_utils import get_meta_info_with_train_test_split, read_slide   # noqa: E402
 
-# Taken directly from
-# https://github.com/random-forests/applied-dl/blob/master/project/starter-code.ipynb
-# See https://openslide.org/api/python/#openslide.OpenSlide.read_region
-# Note: x,y coords are with respect to level 0.
-def read_slide(slide, x, y, level, width, height, as_float=False):
-    """Read a region from openslide object
 
-    Args:
-        slide: openslide object
-        x: left most pixel co-ord
-        y: top most pixel co-ord
-        level: zoom level number
-        width:
-        height:
-        as_float:
-
-    Returns:
-        Numpy RGB array
-
-    """
-    im = slide.read_region((x, y), level, (width, height))
-    im = im.convert('RGB')  # drop the alpha channel
-    if as_float:
-        im = np.asarray(im, dtype=np.float32)
-    else:
-        im = np.asarray(im)
-    assert im.shape == (height, width, 3)
-    return im
+ROI_ZOOM_LEVEL = 5
 
 
 def read_slide_partitions(slide,
@@ -216,25 +196,61 @@ def calc_non_gray_ratio_for_image(image, intensity_threshold=0.8):
     return non_gray_mask.mean()
 
 
-# def read_slide_partition_file(file_path):
-#     """Read partitioned slide file"""
-#     if not file_path.endswith('.png'):
-#         raise ValueError('Slide partition file expected to be png')
-#     return np.asarray(Image.open(file_path))
-#
-#
-# def read_mask_partition_file(file_path):
-#     """Read partitioned mask file - note that this is single channel"""
-#     if not file_path.endswith('.npy'):
-#         raise ValueError('Slide mask file expected to be npy')
-#     return np.load(file_path)
-#
-#
-# def get_slide_filename_from_image_id(image_id):
-#     """Get slide filename"""
-#     return 'tumor_{}.tif'.format(image_id)
-#
-#
-# def get_mask_filename_from_image_id(image_id):
-#     """Get mask filename"""
-#     return 'tumor_{}_mask.tif'.format(image_id)
+def _get_normal_image_contours(cont_img, rgb_image):
+    contours, _ = cv2.findContours(cont_img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    contours_rgb_image_array = np.array(rgb_image)
+
+    line_color = (255, 0, 0)
+    cv2.drawContours(contours_rgb_image_array, contours, -1, line_color, 3)
+    return contours_rgb_image_array
+
+
+def get_roi_mask_and_contour_for_img_array(slide_img):
+    # Quote reference
+
+    hsv = cv2.cvtColor(slide_img, cv2.COLOR_BGR2HSV)
+    lower_red = np.array([30, 30, 30])
+    upper_red = np.array([200, 200, 200])
+    mask = cv2.inRange(hsv, lower_red, upper_red)
+
+    close_kernel = np.ones((50, 50), dtype=np.uint8)
+    image_close = Image.fromarray(cv2.morphologyEx(np.array(mask), cv2.MORPH_CLOSE, close_kernel))
+
+    open_kernel = np.ones((30, 30), dtype=np.uint8)
+    image_open = Image.fromarray(cv2.morphologyEx(np.array(image_close),
+                                                  cv2.MORPH_OPEN, open_kernel))
+    contour_rgb = _get_normal_image_contours(np.array(image_open), slide_img)
+    return contour_rgb, np.array(image_open)
+
+
+def create_roi_mask_and_contour_for_all_images():
+    slide_meta_df = get_meta_info_with_train_test_split()
+    print('Saving ROI contour and mask info under {}'.format(
+        os.path.join(args.img_data_dir, 'roi')))
+
+    for idx, row in slide_meta_df.iterrows():
+        img_id = row['img_id']
+        slide_img_filename = 'tumor_{}.tif'.format(img_id)
+
+        slide = open_slide(os.path.join(args.raw_source_dir, slide_img_filename))
+        roi_level_dim = slide.level_dimensions[ROI_ZOOM_LEVEL]
+        slide_img = read_slide(slide,
+                               x=0,
+                               y=0,
+                               level=ROI_ZOOM_LEVEL,
+                               width=roi_level_dim[0],
+                               height=roi_level_dim[1])
+
+        contour_rgb, img_opening_mask = get_roi_mask_and_contour_for_img_array(slide_img)
+        contour_pil = Image.fromarray(contour_rgb, 'RGB')
+
+        contour_img_dir = os.path.join(args.img_data_dir, 'roi', 'contour')
+        contour_img_file_path = os.path.join(contour_img_dir,
+                                             ROI_CONTOUR_FILEFORMAT.format(img_id))
+        roi_mask_dir = os.path.join(args.img_data_dir, 'roi', 'opening_mask')
+        roi_mask_file_path = os.path.join(roi_mask_dir,
+                                          ROI_MASK_FILEFORMAT.format(img_id))
+
+        contour_pil.save(contour_img_file_path, format='JPEG')
+        np.save(roi_mask_file_path, img_opening_mask)
+    return
