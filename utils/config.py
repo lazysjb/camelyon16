@@ -13,6 +13,7 @@ ROI_MASK_FILEFORMAT = 'zoom_5_opening_mask_tumor_{}.npy'
 ROI_CONTOUR_FILEFORMAT = 'zoom_5_roi_contour_{}.jpg'
 
 NON_GRAY_RATIO_THRESHOLD = 0.4
+ROI_ZOOM_LEVEL = 5
 
 IMG_PARTITION_PARAMS = {
     'zoom_1_256_256': {

@@ -11,11 +11,9 @@ from openslide import open_slide    # noqa: E402
 from skimage.color import rgb2gray  # noqa: E402
 
 from params import args     # noqa: E402
-from utils.config import ROI_CONTOUR_FILEFORMAT, ROI_MASK_FILEFORMAT    # noqa: E402
+from utils.config import (
+    ROI_CONTOUR_FILEFORMAT, ROI_MASK_FILEFORMAT, ROI_ZOOM_LEVEL)    # noqa: E402
 from utils.slide_utils import get_meta_info_with_train_test_split, read_slide   # noqa: E402
-
-
-ROI_ZOOM_LEVEL = 5
 
 
 def read_slide_partitions(slide,
