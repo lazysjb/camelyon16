@@ -28,3 +28,20 @@ IMG_PARTITION_PARAMS = {
         'partition_height': 256,
     },
 }
+
+INFERENCE_FILE_MAPS = [
+    {
+        'model': 'vgg16_transfer',
+        'partition': 'zoom_1_256_256',
+        'split_type': 'test',
+        'file_name': 'vgg_transfer_learn_zoom_1_256_256_test.pkl'
+    },
+
+    {
+        'model': 'vgg16_transfer',
+        'partition': 'zoom_1_256_256',
+        'split_type': 'val',
+        'file_name': 'vgg_transfer_learn_zoom_1_256_256_val.pkl'
+    },
+
+]

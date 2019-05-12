@@ -11,7 +11,8 @@ from sklearn.model_selection import train_test_split
 
 from params import args
 from utils.config import (
-    ALL_SLIDE_IDS, ALL_SLIDE_META_INFO_FILENAME, TRAIN_VAL_TEST_SPLIT_FILENAME
+    ALL_SLIDE_IDS, ALL_SLIDE_META_INFO_FILENAME,
+    INFERENCE_FILE_MAPS, TRAIN_VAL_TEST_SPLIT_FILENAME
 )
 from utils.image_preprocess import read_slide
 
@@ -144,3 +145,17 @@ def get_train_val_test_split(save=True):
         print('Saved output in {}'.format(save_path))
 
     return split_df
+
+
+def get_inference_file_name(model_name,
+                            data_partition,
+                            split_type):
+    def _is_match(x):
+        return (x['model'] == model_name) and (x['partition'] == data_partition) and\
+               (x['split_type'] == split_type)
+
+    result = list(filter(lambda x: _is_match(x), INFERENCE_FILE_MAPS))
+    if len(result) != 1:
+        raise ValueError('Incorrect input params!')
+
+    return result[0]['file_name']
