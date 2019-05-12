@@ -7,3 +7,24 @@ ALL_SLIDE_IDS = (
 
 ALL_SLIDE_META_INFO_FILENAME = 'all_slides_meta_info.pkl'
 TRAIN_VAL_TEST_SPLIT_FILENAME = 'train_val_test_split.pkl'
+PARTITION_META_INFO_FILENAME = 'partition_meta_info.json'
+
+NON_GRAY_RATIO_THRESHOLD = 0.4
+
+IMG_PARTITION_PARAMS = {
+    'zoom_1_256_256': {
+        'partition_dir': 'zoom_1_256_256_partition',
+        'overlap': False,
+        'zoom_level': 1,
+        'partition_width': 256,
+        'partition_height': 256,
+    },
+
+    'zoom_4_256_256': {
+        'partition_dir': 'zoom_4_256_256_partition',
+        'overlap': False,
+        'zoom_level': 4,
+        'partition_width': 256,
+        'partition_height': 256,
+    },
+}

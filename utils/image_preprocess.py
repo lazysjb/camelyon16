@@ -5,6 +5,7 @@ import matplotlib
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt     # noqa: E402
 import numpy as np      # noqa: E402
+from skimage.color import rgb2gray  # noqa: E402
 
 
 # Taken directly from
@@ -209,25 +210,31 @@ def read_slide_partitions_with_overlap(slide,
     return
 
 
-def read_slide_partition_file(file_path):
-    """Read partitioned slide file"""
-    if not file_path.endswith('.png'):
-        raise ValueError('Slide partition file expected to be png')
-    return np.asarray(Image.open(file_path))
+def calc_non_gray_ratio_for_image(image, intensity_threshold=0.8):
+    im_gray = rgb2gray(image / 255.)
+    non_gray_mask = (im_gray <= intensity_threshold)
+    return non_gray_mask.mean()
 
 
-def read_mask_partition_file(file_path):
-    """Read partitioned mask file - note that this is single channel"""
-    if not file_path.endswith('.npy'):
-        raise ValueError('Slide mask file expected to be npy')
-    return np.load(file_path)
-
-
-def get_slide_filename_from_image_id(image_id):
-    """Get slide filename"""
-    return 'tumor_{}.tif'.format(image_id)
-
-
-def get_mask_filename_from_image_id(image_id):
-    """Get mask filename"""
-    return 'tumor_{}_mask.tif'.format(image_id)
+# def read_slide_partition_file(file_path):
+#     """Read partitioned slide file"""
+#     if not file_path.endswith('.png'):
+#         raise ValueError('Slide partition file expected to be png')
+#     return np.asarray(Image.open(file_path))
+#
+#
+# def read_mask_partition_file(file_path):
+#     """Read partitioned mask file - note that this is single channel"""
+#     if not file_path.endswith('.npy'):
+#         raise ValueError('Slide mask file expected to be npy')
+#     return np.load(file_path)
+#
+#
+# def get_slide_filename_from_image_id(image_id):
+#     """Get slide filename"""
+#     return 'tumor_{}.tif'.format(image_id)
+#
+#
+# def get_mask_filename_from_image_id(image_id):
+#     """Get mask filename"""
+#     return 'tumor_{}_mask.tif'.format(image_id)

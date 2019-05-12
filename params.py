@@ -12,6 +12,11 @@ def get_args():
     arg('--meta_data_dir',
         default=os.path.expanduser(
             '~/Personal/Columbia/Applied_DL/Camelyon_Project/data/test_dir'))
+    arg('--img_data_dir',
+        default=os.path.expanduser(
+            '~/Personal/Columbia/Applied_DL/Camelyon_Project/data/test_dir'))
+
+    arg('--img_partition_option', default='zoom_1_256_256')
 
     input_args = parser.parse_args()
 

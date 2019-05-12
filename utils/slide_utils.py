@@ -101,6 +101,18 @@ def _validate_slide_and_mask(slide, mask):
     return
 
 
+def get_meta_info_with_train_test_split():
+    """Join slide level meta info with train/val/test info"""
+    meta_info_path = os.path.join(args.meta_data_dir,
+                                  ALL_SLIDE_META_INFO_FILENAME)
+    meta_info = pd.read_pickle(meta_info_path)
+    split_data_path = os.path.join(args.meta_data_dir,
+                                   TRAIN_VAL_TEST_SPLIT_FILENAME)
+    split_df = pd.read_pickle(split_data_path)
+    joined_df = meta_info.merge(split_df, on='img_id')
+    return joined_df
+
+
 def get_train_val_test_split(save=True):
     meta_info_path = os.path.join(args.meta_data_dir,
                                   ALL_SLIDE_META_INFO_FILENAME)
