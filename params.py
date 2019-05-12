@@ -3,6 +3,7 @@ import os
 
 
 def get_args():
+    """Get user input args from cmd"""
     parser = argparse.ArgumentParser()
     arg = parser.add_argument
 

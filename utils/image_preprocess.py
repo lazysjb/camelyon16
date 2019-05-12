@@ -118,6 +118,7 @@ def read_slide_partitions_with_overlap(slide,
                                        overlap=128,
                                        is_mask=False,
                                        save_file_prefix=None):
+    """Read slide partitions with specified offset and overlap"""
     if is_mask:
         # save as numpy array
         save_path = save_file_prefix + '_{row_id}_{col_id}_overlap_{overlap}_offset_{offset}.npy'
@@ -189,6 +190,7 @@ def read_slide_partitions_with_overlap(slide,
 
 
 def calc_non_gray_ratio_for_image(image, intensity_threshold=0.8):
+    """Calculate non gray ratio for a patch of image"""
     im_gray = rgb2gray(image / 255.)
     non_gray_mask = (im_gray <= intensity_threshold)
     return non_gray_mask.mean()
@@ -204,8 +206,7 @@ def _get_normal_image_contours(cont_img, rgb_image):
 
 
 def get_roi_mask_and_contour_for_img_array(slide_img):
-    # Quote reference
-
+    """Create ROI mask and contour for given slide image"""
     hsv = cv2.cvtColor(slide_img, cv2.COLOR_BGR2HSV)
     lower_red = np.array([30, 30, 30])
     upper_red = np.array([200, 200, 200])
@@ -222,6 +223,7 @@ def get_roi_mask_and_contour_for_img_array(slide_img):
 
 
 def create_roi_mask_and_contour_for_all_images():
+    """Create Region of Interest Mask for all slides"""
     slide_meta_df = get_meta_info_with_train_test_split()
     print('Saving ROI contour and mask info under {}'.format(
         os.path.join(args.img_data_dir, 'roi')))

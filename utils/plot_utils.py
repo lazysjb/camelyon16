@@ -42,6 +42,7 @@ def _get_mask_range_for_pred(pred_row_id,
 
 
 def generate_original_mask(img_id):
+    """Generate original slide and mask image"""
     slide_img_filename = 'tumor_{}.tif'.format(img_id)
     mask_img_filename = 'tumor_{}_mask.tif'.format(img_id)
 
@@ -70,6 +71,7 @@ def generate_prediction_mask(inference_model_name,
                              partition_option,
                              data_split_type,
                              img_id):
+    """Generate image with prediction to be used in heatmap"""
     inference_file_name = get_inference_file_name(inference_model_name,
                                                   partition_option,
                                                   data_split_type)

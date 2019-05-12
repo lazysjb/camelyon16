@@ -17,6 +17,7 @@ def get_evaluation_metrics(inference_model_name,
                            data_split_type,
                            plot_roc_curve=True,
                            plot_confusion_matrix=True):
+    """Evaluate model based on inference output dataframe"""
     inference_file_name = get_inference_file_name(inference_model_name,
                                                   partition_option,
                                                   data_split_type)

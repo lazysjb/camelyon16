@@ -114,6 +114,7 @@ def get_meta_info_with_train_test_split():
 
 
 def get_train_val_test_split(save=True):
+    """Make train / val / test split on slide level"""
     meta_info_path = os.path.join(args.meta_data_dir,
                                   ALL_SLIDE_META_INFO_FILENAME)
     meta_info = pd.read_pickle(meta_info_path)

@@ -17,6 +17,7 @@ from utils.slide_utils import get_meta_info_with_train_test_split
 
 
 def create_image_partition(partition_option):
+    """Create image patches with a specified partition option"""
     slide_meta_df = get_meta_info_with_train_test_split()
 
     partition_settings = IMG_PARTITION_PARAMS[partition_option]
@@ -102,6 +103,7 @@ def _extract_row_col_id_from_file_name(file_name):
 
 
 def create_partition_meta(partition_option):
+    """For each partitioned patch, create meta info"""
     slide_meta_df = get_meta_info_with_train_test_split()
 
     partition_settings = IMG_PARTITION_PARAMS[partition_option]
