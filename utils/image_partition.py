@@ -122,6 +122,18 @@ def _extract_row_col_id_from_file_name(file_name):
     return (int(components[0]), int(components[1]))
 
 
+def get_partition_meta(partition_option):
+    """Read created partition meta file"""
+    partition_settings = IMG_PARTITION_PARAMS[partition_option]
+    partition_root_dir = os.path.join(args.img_data_dir,
+                                      partition_settings['partition_dir'])
+    partition_meta_dir = os.path.join(partition_root_dir, 'meta')
+    meta_path = os.path.join(partition_meta_dir,
+                             PARTITION_META_INFO_FILENAME)
+    meta_df = pd.read_json(meta_path, dtype=False)
+    return meta_df
+
+
 def create_partition_meta(partition_option):
     """For each partitioned patch, create meta info"""
     slide_meta_df = get_meta_info_with_train_test_split()
@@ -140,61 +152,94 @@ def create_partition_meta(partition_option):
     if not os.path.exists(partition_meta_dir):
         os.mkdir(partition_meta_dir)
 
-    result = []
-
-    for idx, row in tqdm(slide_meta_df.iterrows()):
-        split_type = row['type']
-        partition_sub_dir = os.path.join(partition_root_dir, split_type)
-        img_id = row['img_id']
-
-        slide_img_filename = 'tumor_{}.tif'.format(img_id)
-        slide = open_slide(os.path.join(args.raw_source_dir, slide_img_filename))
-        roi_downsample_factor = slide.level_downsamples[ROI_ZOOM_LEVEL]
-        partition_downsample_factor = slide.level_downsamples[partition_zoom_level]
-        downsample_factor = int(roi_downsample_factor / partition_downsample_factor)
-        roi_mask_dir = os.path.join(args.img_data_dir, 'roi', 'opening_mask')
-        roi_mask_file_path = os.path.join(roi_mask_dir,
-                                          ROI_MASK_FILEFORMAT.format(img_id))
-        roi_mask = np.load(roi_mask_file_path)
-        slide.close()
-
-        img_file_paths = _get_slide_img_file_paths_for_img_id(
-            os.path.join(partition_sub_dir, 'slide'),
-            img_id
+    # Label with reference setting
+    if 'label' in partition_settings:
+        ref_partition_option = partition_settings['label']
+        ref_partition_meta_df = get_partition_meta(ref_partition_option)
+        ref_partition_meta_df = ref_partition_meta_df.rename(
+            columns={'file_name': 'ref_file_name'}
         )
 
-        for img_file_path in img_file_paths:
-            img_basename = os.path.basename(img_file_path)
-            mask_file_path = _get_matching_mask_for_img_file(img_file_path)
-            mask_pixel_count = np.load(mask_file_path).sum()
-            label = int(mask_pixel_count > 0)
+        img_file_paths = []
+        for split_type in ['train', 'val', 'test']:
+            partition_sub_dir = os.path.join(partition_root_dir, split_type)
+            img_file_paths += glob(
+                os.path.join(partition_sub_dir, 'slide', 'tumor_slide*.png'))
 
-            img_arr = np.asarray(Image.open(img_file_path))
-            non_gray_ratio = calc_non_gray_ratio_for_image(img_arr)
+        result_df = pd.DataFrame({'file_path': img_file_paths})
+        result_df['file_name'] = result_df['file_path'].apply(os.path.basename)
 
-            row_idx, col_idx = _extract_row_col_id_from_file_name(img_file_path)
-            x_start = row_idx * partition_height // downsample_factor
-            x_end = x_start + partition_height // downsample_factor
-            y_start = col_idx * partition_width // downsample_factor
-            y_end = y_start + partition_width // downsample_factor
+        def _match_with_ref_filename(filename):
+            components = filename.split('_overlap')
+            return components[0] + '.png'
 
-            opening_patch = roi_mask[x_start:x_end, y_start:y_end]
-            is_roi = int(opening_patch.sum() > 1)
+        result_df['ref_file_name'] = result_df['file_name'].apply(_match_with_ref_filename)
+        result_df = result_df.merge(ref_partition_meta_df,
+                                    how='inner',
+                                    on='ref_file_name')
+        result_df = result_df.drop('file_path', axis=1)
+        save_path = os.path.join(partition_meta_dir,
+                                 PARTITION_META_INFO_FILENAME)
+        result_df.to_json(save_path)
+        print('Saved output in {}'.format(save_path))
+        return result_df
 
-            result.append({
-                'img_id': img_id,
-                'file_name': img_basename,
-                'label': label,
-                'non_gray_ratio': non_gray_ratio,
-                'is_non_gray': int(non_gray_ratio > NON_GRAY_RATIO_THRESHOLD),
-                'is_roi': is_roi
-            })
+    else:
+        result = []
 
-    result_df = pd.DataFrame(result)
+        for idx, row in tqdm(slide_meta_df.iterrows()):
+            split_type = row['type']
+            partition_sub_dir = os.path.join(partition_root_dir, split_type)
+            img_id = row['img_id']
 
-    save_path = os.path.join(partition_meta_dir,
-                             PARTITION_META_INFO_FILENAME)
-    result_df.to_json(save_path)
-    print('Saved output in {}'.format(save_path))
+            slide_img_filename = 'tumor_{}.tif'.format(img_id)
+            slide = open_slide(os.path.join(args.raw_source_dir, slide_img_filename))
+            roi_downsample_factor = slide.level_downsamples[ROI_ZOOM_LEVEL]
+            partition_downsample_factor = slide.level_downsamples[partition_zoom_level]
+            downsample_factor = int(roi_downsample_factor / partition_downsample_factor)
+            roi_mask_dir = os.path.join(args.img_data_dir, 'roi', 'opening_mask')
+            roi_mask_file_path = os.path.join(roi_mask_dir,
+                                              ROI_MASK_FILEFORMAT.format(img_id))
+            roi_mask = np.load(roi_mask_file_path)
+            slide.close()
 
-    return result_df
+            img_file_paths = _get_slide_img_file_paths_for_img_id(
+                os.path.join(partition_sub_dir, 'slide'),
+                img_id
+            )
+
+            for img_file_path in img_file_paths:
+                img_basename = os.path.basename(img_file_path)
+                mask_file_path = _get_matching_mask_for_img_file(img_file_path)
+                mask_pixel_count = np.load(mask_file_path).sum()
+                label = int(mask_pixel_count > 0)
+
+                img_arr = np.asarray(Image.open(img_file_path))
+                non_gray_ratio = calc_non_gray_ratio_for_image(img_arr)
+
+                row_idx, col_idx = _extract_row_col_id_from_file_name(img_file_path)
+                x_start = row_idx * partition_height // downsample_factor
+                x_end = x_start + partition_height // downsample_factor
+                y_start = col_idx * partition_width // downsample_factor
+                y_end = y_start + partition_width // downsample_factor
+
+                opening_patch = roi_mask[x_start:x_end, y_start:y_end]
+                is_roi = int(opening_patch.sum() > 1)
+
+                result.append({
+                    'img_id': img_id,
+                    'file_name': img_basename,
+                    'label': label,
+                    'non_gray_ratio': non_gray_ratio,
+                    'is_non_gray': int(non_gray_ratio > NON_GRAY_RATIO_THRESHOLD),
+                    'is_roi': is_roi
+                })
+
+        result_df = pd.DataFrame(result)
+
+        save_path = os.path.join(partition_meta_dir,
+                                 PARTITION_META_INFO_FILENAME)
+        result_df.to_json(save_path)
+        print('Saved output in {}'.format(save_path))
+
+        return result_df
