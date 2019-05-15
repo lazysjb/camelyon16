@@ -230,6 +230,7 @@ def create_partition_meta(partition_option):
                     'img_id': img_id,
                     'file_name': img_basename,
                     'label': label,
+                    'type': split_type,
                     'non_gray_ratio': non_gray_ratio,
                     'is_non_gray': int(non_gray_ratio > NON_GRAY_RATIO_THRESHOLD),
                     'is_roi': is_roi
