@@ -12,7 +12,9 @@ from utils.config import (
     IMG_PARTITION_PARAMS, NON_GRAY_RATIO_THRESHOLD, PARTITION_META_INFO_FILENAME,
     ROI_MASK_FILEFORMAT, ROI_ZOOM_LEVEL
 )
-from utils.image_preprocess import calc_non_gray_ratio_for_image, read_slide_partitions
+from utils.image_preprocess import (
+    calc_non_gray_ratio_for_image, read_slide_partitions, read_slide_partitions_with_overlap
+)
 from utils.slide_utils import get_meta_info_with_train_test_split
 
 
@@ -52,30 +54,48 @@ def create_image_partition(partition_option):
         mask = open_slide(mask_img_filepath)
 
         img_id = row['img_id']
-        slide_img_partition_file_prefix = os.path.join(partition_sub_dir,
-                                                       'slide',
-                                                       'tumor_slide_{}_split'.format(img_id))
-        mask_img_partition_file_prefix = os.path.join(partition_sub_dir,
-                                                      'mask',
-                                                      'tumor_mask_{}_split'.format(img_id))
 
-        _ = read_slide_partitions(
-            slide,
-            zoom_level,
-            partition_width=partition_width,
-            partition_height=partition_height,
-            save_mode=True,
-            save_file_prefix=slide_img_partition_file_prefix
-        )
-        _ = read_slide_partitions(
-            mask,
-            zoom_level,
-            partition_width=partition_width,
-            partition_height=partition_height,
-            save_mode=True,
-            is_mask=True,
-            save_file_prefix=mask_img_partition_file_prefix
-        )
+        # Normal mode, when partition is not overlapping
+        if 'offset_params' not in partition_settings:
+            slide_img_partition_file_prefix = os.path.join(partition_sub_dir,
+                                                           'slide',
+                                                           'tumor_slide_{}_split'.format(img_id))
+            mask_img_partition_file_prefix = os.path.join(partition_sub_dir,
+                                                          'mask',
+                                                          'tumor_mask_{}_split'.format(img_id))
+
+            _ = read_slide_partitions(
+                slide,
+                zoom_level,
+                partition_width=partition_width,
+                partition_height=partition_height,
+                save_mode=True,
+                save_file_prefix=slide_img_partition_file_prefix
+            )
+            _ = read_slide_partitions(
+                mask,
+                zoom_level,
+                partition_width=partition_width,
+                partition_height=partition_height,
+                save_mode=True,
+                is_mask=True,
+                save_file_prefix=mask_img_partition_file_prefix
+            )
+
+        # When partition is paired with other zoom levels / overlapping
+        else:
+            slide_img_partition_file_prefix = os.path.join(partition_sub_dir,
+                                                           'slide',
+                                                           'tumor_slide_{}_split'.format(img_id))
+            _ = read_slide_partitions_with_overlap(
+                slide,
+                zoom_level,
+                partition_width=partition_width,
+                partition_height=partition_height,
+                offset=partition_settings['offset_params']['offset_coord'],
+                overlap=partition_settings['offset_params']['overlap'],
+                save_file_prefix=slide_img_partition_file_prefix
+            )
 
         slide.close()
         mask.close()

@@ -24,6 +24,20 @@ IMG_PARTITION_PARAMS = {
         'partition_height': 256,
     },
 
+    # To use this param, we assume that 'zoom_1_256_256_partition' is already created
+    'zoom_2_256_256_zoom_1_pair': {
+        'partition_dir': 'zoom_2_256_256_partition_zoom_1_pair',
+        'offset_params':
+            {
+                'offset_coord': (64, 64),
+                'overlap': 128,
+            },
+        'label': 'zoom_1_256_256',
+        'zoom_level': 2,
+        'partition_width': 256,
+        'partition_height': 256,
+    },
+
     'zoom_4_256_256': {
         'partition_dir': 'zoom_4_256_256_partition',
         'overlap': False,
