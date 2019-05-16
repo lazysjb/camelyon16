@@ -52,7 +52,7 @@ INFERENCE_FILE_MAPS = [
         'model': 'vgg16_transfer',
         'partition': 'zoom_1_256_256',
         'split_type': 'test',
-        'file_name': 'vgg_transfer_learn_zoom_1_256_256_test.pkl'
+        'file_name': 'zoom_1_256_256_test_inference_result_single_input.pkl'
     },
 
     {
@@ -60,6 +60,13 @@ INFERENCE_FILE_MAPS = [
         'partition': 'zoom_1_256_256',
         'split_type': 'val',
         'file_name': 'vgg_transfer_learn_zoom_1_256_256_val.pkl'
+    },
+
+    {
+        'model': 'vgg16_transfer_double_input',
+        'partition': 'zoom_1_256_256',
+        'split_type': 'test',
+        'file_name': 'zoom_1_256_256_test_inference_result_dual_input.pkl'
     },
 
 ]

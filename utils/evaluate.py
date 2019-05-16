@@ -38,7 +38,7 @@ def get_evaluation_metrics(inference_model_name,
     precision = precision_score(y_truth, y_pred)
     recall = recall_score(y_truth, y_pred)
 
-    loss = log_loss(y_truth, y_pred_prob)
+    loss = log_loss(y_truth, y_pred_prob, eps=1e-6)
     fpr, tpr, threshold = roc_curve(y_truth, y_pred_prob)
     roc_auc = auc(fpr, tpr)
 
@@ -61,7 +61,7 @@ def get_evaluation_metrics(inference_model_name,
         lw = 2
         plt.plot(fpr, tpr, color='orange',
                  lw=lw,
-                 label='{} (area = {:.2f})'.format(
+                 label='{} (area = {:.3f})'.format(
                      inference_model_name, roc_auc))
         plt.plot([0, 1], [0, 1], color='navy', lw=lw, linestyle='--')
         plt.xlim([0.0, 1.0])
