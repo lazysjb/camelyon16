@@ -28,4 +28,9 @@ User inputs such as I/O directories, zoom level configuration can be specified i
 In order for our results to be replicable, we are hosting our trained model weights on Google Cloud.
 
 #### VGG16 Single Input Transfer Learn Model
+- Download: https://storage.googleapis.com/applied-dl-sj/camelyon/output_data/best_weights/vgg_zoom1_256_256_09-0.9554-0.1437.h5
+- Example: Please refer to `models/single_input_inference.ipynb` for example of how to build & load the above weight to make inference.
 
+#### VGG16 Double Input Transfer Learn Model
+- Download: https://storage.googleapis.com/applied-dl-sj/camelyon/output_data/best_weights/combined_vgg_transfer_batch_norm_03-0.9627-0.1151.h5
+- Example: Please refer to `models/double_input_inference.ipynb` for example of how to build & load the above weight to make inference.
