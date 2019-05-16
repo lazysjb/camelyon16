@@ -9,20 +9,16 @@ User inputs such as I/O directories, zoom level configuration can be specified i
 1. Create meta info of slides
 - Example sh script:
 ```bash prepare_data.sh```
-<br>
 
 2. Create image partitions 
 - Example sh script:
 ```bash partition_data.sh```
-<br>
 
 3. Model Code
 - `models/Modelling.ipynb` contains the different types of architectures we ran the data on (ran on Google Colab)
-<br>
 
 4. Inference
 - `models/single_input_inference.ipynb` and `models/double_input_inference.ipynb` for inference on test slides.
-<br>
 
 5. Evaluation
 - `notebook/evaluate_output.ipynb` for example evaluation metrics on test slides
