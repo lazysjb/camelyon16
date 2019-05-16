@@ -1,6 +1,5 @@
 # camelyon16
 ### by Heinrich Peters & Seung-jae Bang
-<br>
 
 ## Steps
 Code is mainly structured to the following 5 steps.
@@ -28,7 +27,6 @@ User inputs such as I/O directories, zoom level configuration can be specified i
 5. Evaluation
 - `notebook/evaluate_output.ipynb` for example evaluation metrics on test slides
 - `notebook/plot_heat_map.ipynb` for example heatmap plots on test / validation slides
-<br>
 
 ## Replicating Inference Results
 In order for our results to be replicable, we are hosting our trained model weights on Google Cloud.
