@@ -1,5 +1,6 @@
 # camelyon16
 ### by Heinrich Peters & Seung-jae Bang
+Our final presentation can be seen in ```presentation/Presentation.pdf```
 
 ## Steps
 Code is mainly structured to the following 5 steps.
