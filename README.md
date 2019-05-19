@@ -21,7 +21,7 @@ User inputs such as I/O directories, zoom level configuration can be specified i
 - `models/single_input_inference.ipynb` and `models/double_input_inference.ipynb` for inference on test slides.
 
 5. Evaluation
-- `notebook/evaluate_output.ipynb` for example evaluation metrics on test slides
+- `notebook/evaluate_output.ipynb` for example evaluation metrics on test slides. Please note our evaluation is performed not on the whole slide but on the tissue region after preprocessing (ROI and grayscale filter) - hence metrics may appear worse compared to that performed on whole slide.
 - `notebook/plot_heat_map.ipynb` for example heatmap plots on test / validation slides. Please refer to this notebook for heatmap on the entire set of test slides (4 slides)
 
 ## Replicating Inference Results
