@@ -22,7 +22,7 @@ User inputs such as I/O directories, zoom level configuration can be specified i
 
 5. Evaluation
 - `notebook/evaluate_output.ipynb` for example evaluation metrics on test slides
-- `notebook/plot_heat_map.ipynb` for example heatmap plots on test / validation slides
+- `notebook/plot_heat_map.ipynb` for example heatmap plots on test / validation slides. Please refer to this notebook for heatmap on the entire set of test slides (4 slides)
 
 ## Replicating Inference Results
 In order for our results to be replicable, we are hosting our trained model weights on Google Cloud.
