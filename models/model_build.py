@@ -7,6 +7,7 @@ from tensorflow.keras.layers import (
 
 
 def build_vgg16_single_input(input_shape=(256, 256, 3)):
+    """Corresponds to model_vgg_ver2 of Modelling.ipynb file"""
     # Single input VGG16 transfer learn
     vgg_base = VGG16(weights='imagenet', include_top=False, input_shape=input_shape)
 
@@ -24,6 +25,7 @@ def build_vgg16_single_input(input_shape=(256, 256, 3)):
 
 
 def build_vgg16_double_input(input_shape=(256, 256, 3)):
+    """Corresponds to model_10 of Modelling.ipynb file"""
     # Double input VGG16 transfer learn
     vgg_base = VGG16(weights='imagenet', include_top=False, input_shape=input_shape)
 
